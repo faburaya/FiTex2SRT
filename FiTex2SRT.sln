@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiTex2SRT", "FiTex2SRT.csproj", "{8E92FDAD-8B33-4DBB-917A-43B1EB7F6E5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Readers", "Readers\Readers.csproj", "{29D30822-0BD6-42DC-96CE-E81D77A1A590}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8E92FDAD-8B33-4DBB-917A-43B1EB7F6E5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E92FDAD-8B33-4DBB-917A-43B1EB7F6E5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E92FDAD-8B33-4DBB-917A-43B1EB7F6E5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E92FDAD-8B33-4DBB-917A-43B1EB7F6E5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29D30822-0BD6-42DC-96CE-E81D77A1A590}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29D30822-0BD6-42DC-96CE-E81D77A1A590}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29D30822-0BD6-42DC-96CE-E81D77A1A590}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29D30822-0BD6-42DC-96CE-E81D77A1A590}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E9B1A58E-8CA0-4433-9005-0054E1F4F4E2}
+	EndGlobalSection
+EndGlobal
