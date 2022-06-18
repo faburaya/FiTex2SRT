@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="C:\Users\felip\.nuget\packages\com.faburaya.reusable.utils\6.3.0\contentFiles\any\net6.0\secrets.xsd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="com.faburaya.Reusable.Utils" Version="6.3.0" />
     <PackageReference Include="iTextSharp" Version="5.5.13.3" />
   </ItemGroup>
 
