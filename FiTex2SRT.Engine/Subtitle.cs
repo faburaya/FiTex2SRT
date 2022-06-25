@@ -1,5 +1,5 @@
 ﻿
-namespace Readers
+namespace FiTex2SRT.Engine
 {
     public struct Subtitle
     {

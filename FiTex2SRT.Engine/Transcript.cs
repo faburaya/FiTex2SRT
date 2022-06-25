@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Readers
+namespace FiTex2SRT.Engine
 {
     /// <summary>
     /// Holds the text and the scarce synchronization that have been read

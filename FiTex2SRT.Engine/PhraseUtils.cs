@@ -2,7 +2,7 @@
 
 using Reusable.Utils;
 
-namespace Readers
+namespace FiTex2SRT.Engine
 {
     /// <summary>
     /// Sammelt Algorithmen, die für die Behandlung von Sätzen nützlich sind.

@@ -1,5 +1,5 @@
 ﻿
-namespace Readers
+namespace FiTex2SRT.Engine
 {
     /// <summary>
     /// Interface for loading subtitles.

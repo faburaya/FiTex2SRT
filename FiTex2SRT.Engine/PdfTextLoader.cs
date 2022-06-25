@@ -3,7 +3,7 @@
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 
-namespace Readers
+namespace FiTex2SRT.Engine
 {
     /// <summary>
     /// Loads transcripts from PDF files.

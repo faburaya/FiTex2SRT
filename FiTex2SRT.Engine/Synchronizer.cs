@@ -1,6 +1,6 @@
 ﻿using Reusable.Utils;
 
-namespace Readers
+namespace FiTex2SRT.Engine
 {
     /// <summary>
     /// Verwendet die automatisch erzeugten Untertiteln, die verlässliche Zeitpunkte haben,
