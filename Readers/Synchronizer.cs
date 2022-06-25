@@ -3,7 +3,8 @@
 namespace Readers
 {
     /// <summary>
-    /// 
+    /// Verwendet die automatisch erzeugten Untertiteln, die verlässliche Zeitpunkte haben,
+    /// um das Manuskript zu synchronisieren, das ursprünglich über knappe Zeitpunkte verfügt.
     /// </summary>
     public class Synchronizer
     {
@@ -16,44 +17,14 @@ namespace Readers
             _subtitlesLoader = subtitlesLoader;
         }
 
-        public static int CalculateCenterOf(IEnumerable<SubstringRef> manyWords)
-        {
-            int sumOfIndices = 0;
-            int countOfChars = 0;
-
-            foreach (SubstringRef word in manyWords)
-            {
-                countOfChars += word.length;
-                sumOfIndices += (2 * word.start + word.length - 1) * word.length / 2;
-            }
-
-            return (int)Math.Round((double)sumOfIndices / countOfChars);
-        }
-
-        private static (int fromAutoSub, int fromTranscript) CalculateCenterOfMatchedWords(
-            List<SubstringRef> autoSubWords, List<SubstringRef> transcriptWords)
-        {
-            List<SubstringRef> matchedAutoSubWords = new();
-            List<SubstringRef> matchedTranscriptWords = new();
-
-            foreach (SubstringRef wordOfAutoSub in autoSubWords)
-            {
-                int idx = transcriptWords.FindIndex(0,
-                    s => s.CompareTo(wordOfAutoSub, StringComparison.OrdinalIgnoreCase) == 0);
-
-                if (idx < 0)
-                    continue;
-
-                matchedAutoSubWords.Add(wordOfAutoSub);
-                matchedTranscriptWords.Add(transcriptWords[idx]);
-                transcriptWords.RemoveAt(idx);
-            }
-
-            return (CalculateCenterOf(matchedAutoSubWords),
-                    CalculateCenterOf(matchedTranscriptWords));
-        }
-
-        public Transcript CreateRefinedTranscript(string transcriptFilePath, string autoSubsFilePath)
+        /// <summary>
+        /// Bereichern das Manuskript mit Zeitpunkten, die mithilfe der Synchronisierung
+        /// der automatisch erzeugten Untertitel berechnet werden.
+        /// </summary>
+        /// <param name="autoSubsFilePath">Das Dateipfad der automatisch erzeugten Untertitel.</param>
+        /// <param name="transcriptFilePath">Das Dateipfad des Manuskripts.</param>
+        /// <returns></returns>
+        public Transcript CreateRefinedTranscript(string autoSubsFilePath, string transcriptFilePath)
         {
             IList<Subtitle> autoSubtitles =
                 _subtitlesLoader.LoadSubtitlesFromFile(autoSubsFilePath, out int lengthOfAutoSubs);
@@ -76,14 +47,17 @@ namespace Readers
                 List<SubstringRef> transcriptWords =
                     WordUtils.SplitIntoWordsAsRefs(transcript.Text, start, end);
 
-                (int centerOfMatchInAutoSub, int centerOfMatchInTranscript) =
-                    CalculateCenterOfMatchedWords(autoSubWords, transcriptWords);
+                (IList<SubstringRef> matchesInAutoSubs, IList<SubstringRef> matchesInTranscript) =
+                    PhraseUtils.FindMatches(autoSubWords, transcriptWords);
+
+                int centerOfMatchInAutoSub = PhraseUtils.CalculateCenterOf(matchesInAutoSubs);
+                int centerOfMatchInTranscript = PhraseUtils.CalculateCenterOf(matchesInTranscript);
 
                 TimeSpan avgTimeOfMatchedAutoSub = subtitle.startTime +
                     ((double)centerOfMatchInAutoSub / subtitle.caption.Length)
                     * (subtitle.endTime - subtitle.startTime);
 
-                transcript.SyncTimes.Add(avgTimeOfMatchedAutoSub, centerOfMatchInTranscript);
+                transcript.SyncTimes.Add(centerOfMatchInTranscript, avgTimeOfMatchedAutoSub);
 
                 nextIdx = WordUtils.FindClosestStartOrEndOfWord(transcript.Text, start +
                     (int)Math.Round(subtitle.caption.Length * lenRatioFromAutoToHumanTranslation));
