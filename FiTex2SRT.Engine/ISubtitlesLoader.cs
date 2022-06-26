@@ -2,16 +2,16 @@
 namespace FiTex2SRT.Engine
 {
     /// <summary>
-    /// Interface for loading subtitles.
+    /// Schnittstelle zum Laden der Untertitel.
     /// </summary>
     public interface ISubtitlesLoader
     {
         /// <summary>
-        /// Load subtitles from a file.
+        /// Ladet die Untertitel aus einer Datei.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
-        /// <param name="countOfChars">Receives the count of characters of all captions.</param>
-        /// <returns>A list with all subtitles.</returns>
-        public IList<Subtitle> LoadSubtitlesFromFile(string filePath, out int countOfChars);
+        /// <param name="filePath">Das Dateipfad.</param>
+        /// <param name="countOfChars">Die Zahl von Zeichen der gesamten Untertitel.</param>
+        /// <returns>Eine Liste mit einer Instanz von <see cref="Subtitle"/> für jeden Untertitel.</returns>
+        public List<Subtitle> LoadSubtitlesFromFile(string filePath, out int countOfChars);
     }
 }

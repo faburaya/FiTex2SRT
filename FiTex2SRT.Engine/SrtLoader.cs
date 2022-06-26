@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 namespace FiTex2SRT.Engine
 {
     /// <summary>
-    /// Loads subtitles from SRT files.
+    /// Ladet Untertitel von dem Dateiformat SRT.
     /// </summary>
     public class SrtLoader : ISubtitlesLoader
     {
@@ -12,7 +12,7 @@ namespace FiTex2SRT.Engine
             new (@"\d+\r\n(?<start>\d{2}:\d{2}:\d{2},\d{3}) --> (?<end>\d{2}:\d{2}:\d{2},\d{3})\r\n(?<caption>.+(?:\r\n.+)*)\r\n", RegexOptions.Compiled);
 
         /// <inheritdoc/>
-        public IList<Subtitle> LoadSubtitlesFromFile(string filePath, out int countOfChars)
+        public List<Subtitle> LoadSubtitlesFromFile(string filePath, out int countOfChars)
         {
             CultureInfo culture = new("de-DE");
             countOfChars = 0;
