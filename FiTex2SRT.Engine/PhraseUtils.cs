@@ -13,9 +13,9 @@ namespace FiTex2SRT.Engine
         /// Rechnet das Zentrum einer Liste von Wörtern.
         /// </summary>
         /// <param name="manyWords">Die Liste von Wörtern.</param>
-        /// <returns>Die Indexposition des Zentrums. Je größer das Wort ist,
-        /// desto mehr zieht es das Zentrum auf sich selbst.</returns>
-        public static int CalculateCenterOf(IEnumerable<SubstringRef> manyWords)
+        /// <returns>Die Indexposition des Zentrums, wenn mindestens ein Wort vorhanden ist.
+        /// Je größer das Wort ist, desto mehr zieht es das Zentrum auf sich selbst.</returns>
+        public static int? CalculateCenterOf(IEnumerable<SubstringRef> manyWords)
         {
             int sumOfIndices = 0;
             int countOfChars = 0;
@@ -26,7 +26,12 @@ namespace FiTex2SRT.Engine
                 sumOfIndices += (2 * word.start + word.length - 1) * word.length / 2;
             }
 
-            return (int)Math.Round((double)sumOfIndices / countOfChars);
+            if (countOfChars > 0)
+            {
+                return (int)Math.Round((double)sumOfIndices / countOfChars);
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -37,29 +42,30 @@ namespace FiTex2SRT.Engine
         /// <remarks>Groß- und Kleinschreibung haben keinen Einfluss.</remarks>
         /// <returns>Die Wörter aus der linken Seite, die in der rechten Seite gefunden wurden. Denn jede Übereinstimmung kommt einmal links und einmal rechts vor, werden sie in zwei Listen aufgeteilt.</returns>
         public static (List<SubstringRef> onTheLeft, List<SubstringRef> onTheRight) FindMatches(
-            List<SubstringRef> wordsOnTheLeft, List<SubstringRef> wordsOnTheRight)
+            IEnumerable<SubstringRef> wordsOnTheLeft, IEnumerable<SubstringRef> wordsOnTheRight)
         {
             List<SubstringRef> matchesOnTheLeft = new();
             List<SubstringRef> matchesOnTheRight = new();
 
+            List<SubstringRef> rightList = wordsOnTheRight.ToList();
             foreach (SubstringRef word in wordsOnTheLeft)
             {
-                int idx = wordsOnTheRight.FindIndex(0,
+                int idx = rightList.FindIndex(0,
                     s => s.CompareTo(word, StringComparison.OrdinalIgnoreCase) == 0);
 
                 if (idx < 0)
                     continue;
 
                 matchesOnTheLeft.Add(word);
-                matchesOnTheRight.Add(wordsOnTheRight[idx]);
-                wordsOnTheRight.RemoveAt(idx);
+                matchesOnTheRight.Add(rightList[idx]);
+                rightList.RemoveAt(idx);
             }
 
             return (matchesOnTheLeft, matchesOnTheRight);
         }
 
         private static readonly Regex _endPhraseRegex =
-            new(@"\w(?<end>\s+-+\s+|\s*[,;:]+\s*|\s*(?<finalchars>[.?!]+)\s*)", RegexOptions.Compiled);
+            new(@"[\w\)](?<end>\s+-+\s+|\s*[,;:]+\s*|\s*(?<finalchars>[.?!]+)\s*)", RegexOptions.Compiled);
 
         /// <summary>
         /// Findet das Ende eines Satzes.

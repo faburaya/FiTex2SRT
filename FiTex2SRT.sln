@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FiTex2SRT", "FiTex2SRT\FiTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FiTex2SRT.Engine", "FiTex2SRT.Engine\FiTex2SRT.Engine.csproj", "{39F6F381-99D1-4ACC-88F1-E57714E1903C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FiTex2SRT.Engine.UnitTests", "FiTex2SRT.Engine.UnitTests\FiTex2SRT.Engine.UnitTests.csproj", "{655D4D6B-611C-4F8C-916C-6BB8C6370A86}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{39F6F381-99D1-4ACC-88F1-E57714E1903C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{39F6F381-99D1-4ACC-88F1-E57714E1903C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{39F6F381-99D1-4ACC-88F1-E57714E1903C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{655D4D6B-611C-4F8C-916C-6BB8C6370A86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{655D4D6B-611C-4F8C-916C-6BB8C6370A86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{655D4D6B-611C-4F8C-916C-6BB8C6370A86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{655D4D6B-611C-4F8C-916C-6BB8C6370A86}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

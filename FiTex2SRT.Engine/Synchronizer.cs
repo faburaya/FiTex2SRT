@@ -1,4 +1,6 @@
-﻿using Reusable.Utils;
+﻿using System.Diagnostics;
+
+using Reusable.Utils;
 
 namespace FiTex2SRT.Engine
 {
@@ -23,7 +25,7 @@ namespace FiTex2SRT.Engine
         /// </summary>
         /// <param name="autoSubsFilePath">Das Dateipfad der automatisch erzeugten Untertitel.</param>
         /// <param name="transcriptFilePath">Das Dateipfad des Manuskripts.</param>
-        /// <returns></returns>
+        /// <returns>Das Bereicherte Manuskript.</returns>
         public Transcript CreateRefinedTranscript(string autoSubsFilePath, string transcriptFilePath)
         {
             IList<Subtitle> autoSubtitles =
@@ -50,14 +52,19 @@ namespace FiTex2SRT.Engine
                 (IList<SubstringRef> matchesInAutoSubs, IList<SubstringRef> matchesInTranscript) =
                     PhraseUtils.FindMatches(autoSubWords, transcriptWords);
 
-                int centerOfMatchInAutoSub = PhraseUtils.CalculateCenterOf(matchesInAutoSubs);
-                int centerOfMatchInTranscript = PhraseUtils.CalculateCenterOf(matchesInTranscript);
+                int? centerOfMatchInAutoSub = PhraseUtils.CalculateCenterOf(matchesInAutoSubs);
+                int? centerOfMatchInTranscript = PhraseUtils.CalculateCenterOf(matchesInTranscript);
 
-                TimeSpan avgTimeOfMatchedAutoSub = subtitle.startTime +
-                    ((double)centerOfMatchInAutoSub / subtitle.caption.Length)
-                    * (subtitle.endTime - subtitle.startTime);
+                Debug.Assert(centerOfMatchInAutoSub.HasValue == centerOfMatchInTranscript.HasValue);
 
-                transcript.SyncTimes.Add(centerOfMatchInTranscript, avgTimeOfMatchedAutoSub);
+                if (centerOfMatchInAutoSub.HasValue && centerOfMatchInTranscript.HasValue)
+                {
+                    TimeSpan avgTimeOfMatchedAutoSub = subtitle.startTime +
+                        ((double)centerOfMatchInAutoSub.Value / subtitle.caption.Length)
+                        * (subtitle.endTime - subtitle.startTime);
+
+                    transcript.SyncTimes.Add(centerOfMatchInTranscript.Value, avgTimeOfMatchedAutoSub);
+                }
 
                 nextIdx = WordUtils.FindClosestStartOrEndOfWord(transcript.Text, start +
                     (int)Math.Round(subtitle.caption.Length * lenRatioFromAutoToHumanTranslation));
