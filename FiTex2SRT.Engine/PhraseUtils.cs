@@ -84,7 +84,7 @@ namespace FiTex2SRT.Engine
             var capturedEndChars = nextMatch.Groups["finalchars"];
             if (capturedEndChars.Success)
             {
-                return (capturedEndChars.Index + 1,
+                return (capturedEndChars.Index + capturedEndChars.Length,
                         capturedInterval.Index + capturedInterval.Length);
             }
 

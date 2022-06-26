@@ -145,6 +145,14 @@ namespace FiTex2SRT.Engine.UnitTests
         }
 
         [Fact]
+        public void FindEndOfSentence_EllipsisIsDelimiter()
+        {
+            string text = "Lorem ... Ipsum...";
+            string[] expectedSentences = new[] { "Lorem ...", "Ipsum..." };
+            VerifyText(text, expectedSentences);
+        }
+
+        [Fact]
         public void FindEndOfSentence_ExclamationOrInterrogative()
         {
             string text = "Lorem? Ipsum!";
@@ -177,10 +185,18 @@ namespace FiTex2SRT.Engine.UnitTests
         }
 
         [Fact]
-        public void FindEndOfSentence_DashIsNotDelimiter()
+        public void FindEndOfSentence_DashIsNotDelimiter_IfWithinWord()
         {
             string text = "Lorem-ipsum-dolor";
             string[] expectedSentences = new[] { "Lorem-ipsum-dolor" };
+            VerifyText(text, expectedSentences);
+        }
+
+        [Fact]
+        public void FindEndOfSentence_DashIsNotDelimiter_IfPrefix()
+        {
+            string text = "Rede- und Meinungsfreiheit";
+            string[] expectedSentences = new[] { "Rede- und Meinungsfreiheit" };
             VerifyText(text, expectedSentences);
         }
 
@@ -189,6 +205,22 @@ namespace FiTex2SRT.Engine.UnitTests
         {
             string text = "Lorem (ipsum), dolor (??) sit (amet).";
             string[] expectedSentences = new[] { "Lorem (ipsum)", "dolor (??) sit (amet)." };
+            VerifyText(text, expectedSentences);
+        }
+
+        [Fact]
+        public void FindEndOfSentence_ManySentences()
+        {
+            string text = "Lorem, ipsum. Dolor! Sit: amet.";
+            string[] expectedSentences = new[] { "Lorem", "ipsum.", "Dolor!", "Sit", "amet." };
+            VerifyText(text, expectedSentences);
+        }
+
+        [Fact]
+        public void FindEndOfSentence_ManyLines()
+        {
+            string text = "Lorem,\nipsum.\nDolor!\r\nSit:\r\namet.";
+            string[] expectedSentences = new[] { "Lorem", "ipsum.", "Dolor!", "Sit", "amet." };
             VerifyText(text, expectedSentences);
         }
     }
