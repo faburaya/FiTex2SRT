@@ -6,10 +6,11 @@ using iTextSharp.text.pdf.parser;
 namespace FiTex2SRT.Engine
 {
     /// <summary>
-    /// Loads transcripts from PDF files.
+    /// Ladet das Manuskript aus Dateien im Format PDF.
     /// </summary>
     public class PdfTextLoader : ITranscriptLoader
     {
+        /// <inheritdoc/>
         public string LoadRawTranscriptFromFile(string filePath)
         {
             StringBuilder buffer = new();
