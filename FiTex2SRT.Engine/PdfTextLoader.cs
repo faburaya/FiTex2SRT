@@ -20,7 +20,7 @@ namespace FiTex2SRT.Engine
             for (int page = 1; page <= reader.NumberOfPages; page++)
             {
                 string text = PdfTextExtractor.GetTextFromPage(reader, page);
-                buffer.Append(text);
+                buffer.AppendLine(text);
             }
 
             return buffer.ToString();
