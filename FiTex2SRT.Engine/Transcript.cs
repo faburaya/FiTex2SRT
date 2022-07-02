@@ -26,9 +26,27 @@ namespace FiTex2SRT.Engine
             Debug.Assert(parts.Length == 4);
             return new TimeSpan(0, parts[0], parts[1], parts[2], parts[3] * 10);
         }
+        
+        private static void AppendToSameLine(StringBuilder buffer, string s, int start, int end)
+        {
+            foreach (char ch in s.AsSpan(start, end - start))
+            {
+                switch (ch)
+                {
+                    case '\r':
+                        break;
+                    case '\n':
+                        buffer.Append(' ');
+                        break;
+                    default:
+                        buffer.Append(ch);
+                        break;
+                }
+            }
+        }
 
         private readonly static Regex _timeRegex =
-            new(@"(?<start>[\d]{2}:[\d]{2}:[\d]{2}:[\d]{2}) - (?<end>[\d]{2}:[\d]{2}:[\d]{2}:[\d]{2})[\r\n]{1,2}",
+            new(@"(?<start>[\d]{2}:[\d]{2}:[\d]{2}:[\d]{2}) - (?<end>[\d]{2}:[\d]{2}:[\d]{2}:[\d]{2})\s+",
                 RegexOptions.Compiled);
 
         /// <summary>
@@ -40,29 +58,23 @@ namespace FiTex2SRT.Engine
         {
             StringBuilder buffer = new();
             SortedDictionary<int, TimeSpan> syncTimes = new();
-            MatchCollection matches = _timeRegex.Matches(rawText);
-            for (int i = 0; i < matches.Count; i++)
+
+            Match? previousMatch = null;
+            foreach (Match match in _timeRegex.Matches(rawText))
             {
-                Match match = matches[i];
-                syncTimes.Add(buffer.Length, ParseTime(match.Groups["start"].Value));
-                int start = match.Index + match.Length;
-                int end = (i + 1 < matches.Count ? matches[i + 1].Index : rawText.Length);
-                for (int j = start; j < end; ++j)
+                if (previousMatch != null)
                 {
-                    char ch = rawText[j];
-                    switch (ch)
-                    {
-                        case '\r':
-                            break;
-                        case '\n':
-                            buffer.Append(' ');
-                            break;
-                        default:
-                            buffer.Append(ch);
-                            break;
-                    }
+                    AppendToSameLine(buffer, rawText, previousMatch.Index + previousMatch.Length, match.Index);
+                    syncTimes.Add(buffer.Length - 1, ParseTime(previousMatch.Groups["end"].Value));
                 }
-                syncTimes.Add(buffer.Length - 1, ParseTime(match.Groups["end"].Value));
+                syncTimes.Add(buffer.Length, ParseTime(match.Groups["start"].Value));
+                previousMatch = match;
+            }
+
+            if (previousMatch != null)
+            {
+                AppendToSameLine(buffer, rawText, previousMatch.Index + previousMatch.Length, rawText.Length);
+                syncTimes.Add(buffer.Length - 1, ParseTime(previousMatch.Groups["end"].Value));
             }
 
             return new Transcript(buffer.ToString(), syncTimes);
