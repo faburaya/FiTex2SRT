@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace FiTex2SRT.Engine
@@ -19,6 +21,14 @@ namespace FiTex2SRT.Engine
             SyncTimes = syncTimes;
         }
 
+        private static TimeSpan ParseTime(string timestamp)
+        {
+            int[] parts = (from s in timestamp.Split(':') select int.Parse(s)).ToArray();
+            Debug.Assert(parts.Length == 4);
+            return new TimeSpan(0, parts[0], parts[1], parts[2], parts[3] * 10);
+
+        }
+
         private readonly static Regex _timeRegex =
             new(@"^(?<start>[\d]{2}:[\d]{2}:[\d]{2}:[\d]{2}) - (?<end>[\d]{2}:[\d]{2}:[\d]{2}:[\d]{2})",
                 RegexOptions.Compiled | RegexOptions.Multiline);
@@ -36,10 +46,11 @@ namespace FiTex2SRT.Engine
             foreach (Match match in matches)
             {
                 paragraphs.Add((
-                    match.Index - 1,
+                    match.Index,
                     match.Index + match.Length + 1,
-                    TimeSpan.Parse(match.Groups["start"].Value),
-                    TimeSpan.Parse(match.Groups["end"].Value)));
+                    ParseTime(match.Groups["start"].Value),
+                    ParseTime(match.Groups["end"].Value)
+                ));
             }
 
             SortedDictionary<int, TimeSpan> syncTimes = new();
@@ -50,7 +61,7 @@ namespace FiTex2SRT.Engine
                 int idxStart = paragraphs[idx].idxStart;
                 int idxEnd = (idx + 1 < paragraphs.Count ? paragraphs[idx + 1].idxPrevEnd : rawText.Length);
                 buffer.Append(rawText.AsSpan(idxStart, idxEnd - idxStart));
-                syncTimes.Add(buffer.Length, paragraphs[idx].endTime);
+                syncTimes.Add(buffer.Length - 1, paragraphs[idx].endTime);
             }
 
             return new Transcript(buffer.ToString(), syncTimes);
