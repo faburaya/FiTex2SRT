@@ -33,13 +33,13 @@ namespace FiTex2SRT.Engine.UnitTests
             SortedDictionary<int, TimeSpan> syncTimes = new();
             foreach (var paragraph in paragraphs)
             {
-                buffer.AppendLine();
                 syncTimes.Add(buffer.Length, paragraph.start);
                 buffer.Append(paragraph.text);
                 syncTimes.Add(buffer.Length - 1, paragraph.end);
                 buffer.AppendLine();
             }
-
+            buffer.Replace("\r", "");
+            buffer.Replace('\n', ' ');
             return (buffer.ToString(), syncTimes);
         }
 
@@ -56,7 +56,7 @@ namespace FiTex2SRT.Engine.UnitTests
             var (expectedText, expectedSyncTimes) = CreateExpectations(paragraphs);
             string rawText = GenerateRawTranscriptText(paragraphs);
             Transcript transcript = Transcript.Parse(rawText);
-            Assert.Equal(expectedText.ReplaceLineEndings(), transcript.Text.ReplaceLineEndings());
+            Assert.Equal(expectedText, transcript.Text);
 
             (TimeSpan time, int pos)[] expectedSyncTimesAsPairs =
                 (from pair in expectedSyncTimes select (pair.Value, pair.Key)).ToArray();
@@ -70,7 +70,7 @@ namespace FiTex2SRT.Engine.UnitTests
             {
                 var expected = expectedSyncTimesAsPairs[idx];
                 var actual = actualSyncTimesAsPairs[idx];
-                Assert.InRange(actual.pos, expected.pos - 4, expected.pos + 4);
+                Assert.InRange(actual.pos, expected.pos - 2, expected.pos + 2);
                 Assert.Equal(expected.time, actual.time);
             }
             Assert.Equal(expectedSyncTimesAsPairs.Length, actualSyncTimesAsPairs.Length);
