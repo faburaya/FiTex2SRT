@@ -26,21 +26,21 @@ namespace FiTex2SRT.Engine.UnitTests
             return buffer.ToString();
         }
 
-        private static (string text, SortedDictionary<int, TimeSpan> syncTimes) CreateExpectations(
+        private static (string text, List<(TimeSpan, int)> syncPoints) CreateExpectations(
             List<(TimeSpan start, TimeSpan end, string text)> paragraphs)
         {
             StringBuilder buffer = new();
-            SortedDictionary<int, TimeSpan> syncTimes = new();
+            List<(TimeSpan, int)> syncPoints = new();
             foreach (var paragraph in paragraphs)
             {
-                syncTimes.Add(buffer.Length, paragraph.start);
+                syncPoints.Add((paragraph.start, buffer.Length));
                 buffer.Append(paragraph.text);
-                syncTimes.Add(buffer.Length - 1, paragraph.end);
+                syncPoints.Add((paragraph.end, buffer.Length - 1));
                 buffer.AppendLine();
             }
             buffer.Replace("\r", "");
             buffer.Replace('\n', ' ');
-            return (buffer.ToString(), syncTimes);
+            return (buffer.ToString(), syncPoints);
         }
 
         [Fact]
@@ -53,27 +53,21 @@ namespace FiTex2SRT.Engine.UnitTests
                 (new TimeSpan(0, 1, 2, 34, 500), new TimeSpan(0, 2, 3, 45, 670), "Dritter Abschnitt.\nAndere Zeile."),
             };
 
-            var (expectedText, expectedSyncTimes) = CreateExpectations(paragraphs);
+            var expected = CreateExpectations(paragraphs);
             string rawText = GenerateRawTranscriptText(paragraphs);
             Transcript transcript = Transcript.Parse(rawText);
-            Assert.Equal(expectedText, transcript.Text);
-
-            (TimeSpan time, int pos)[] expectedSyncTimesAsPairs =
-                (from pair in expectedSyncTimes select (pair.Value, pair.Key)).ToArray();
-
-            (TimeSpan time, int pos)[] actualSyncTimesAsPairs =
-                (from pair in transcript.SyncTimes select (pair.Value, pair.Key)).ToArray();
+            Assert.Equal(expected.text, transcript.Text);
 
             for (int idx = 0;
-                 idx < Math.Min(expectedSyncTimesAsPairs.Length, actualSyncTimesAsPairs.Length);
+                 idx < Math.Min(expected.syncPoints.Count, transcript.SyncPoints.Count);
                  ++idx)
             {
-                var expected = expectedSyncTimesAsPairs[idx];
-                var actual = actualSyncTimesAsPairs[idx];
-                Assert.InRange(actual.pos, expected.pos - 2, expected.pos + 2);
-                Assert.Equal(expected.time, actual.time);
+                (TimeSpan expectedTime, int expectedPos) = expected.syncPoints[idx];
+                (TimeSpan actualTime, int actualPos) = transcript.SyncPoints[idx];
+                Assert.InRange(actualPos, expectedPos - 2, expectedPos + 2);
+                Assert.Equal(expectedTime, actualTime);
             }
-            Assert.Equal(expectedSyncTimesAsPairs.Length, actualSyncTimesAsPairs.Length);
+            Assert.Equal(expected.syncPoints.Count, transcript.SyncPoints.Count);
         }
     }
 }

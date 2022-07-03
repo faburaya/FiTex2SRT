@@ -52,11 +52,8 @@ namespace FiTex2SRT.Engine.UnitTests
             };
 
             string filePath = CreateSrtFile(expectedSubtitles);
-            IList<Subtitle> actualSubtitles =
-                new SrtLoader().LoadSubtitlesFromFile(filePath, out int actualCharCount);
-
+            IList<Subtitle> actualSubtitles = new SrtLoader().LoadSubtitlesFromFile(filePath);
             Assert.Equal(expectedSubtitles, actualSubtitles);
-            Assert.Equal(expectedSubtitles.Sum(x => x.caption.Length), actualCharCount);
         }
     }
 }

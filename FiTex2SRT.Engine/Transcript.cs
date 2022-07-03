@@ -12,12 +12,12 @@ namespace FiTex2SRT.Engine
     {
         public string Text { get; private init; }
 
-        public SortedDictionary<int, TimeSpan> SyncTimes { get; private init; }
+        public List<(TimeSpan time, int pos)> SyncPoints { get; private init; }
 
-        private Transcript(string text, SortedDictionary<int, TimeSpan> syncTimes)
+        private Transcript(string text, List<(TimeSpan, int)> syncPoints)
         {
             Text = text;
-            SyncTimes = syncTimes;
+            SyncPoints = syncPoints;
         }
 
         private static TimeSpan ParseTime(string timestamp)
@@ -57,7 +57,7 @@ namespace FiTex2SRT.Engine
         public static Transcript Parse(string rawText)
         {
             StringBuilder buffer = new();
-            SortedDictionary<int, TimeSpan> syncTimes = new();
+            List<(TimeSpan time, int pos)> syncPoints = new();
 
             Match? previousMatch = null;
             foreach (Match match in _timeRegex.Matches(rawText))
@@ -65,19 +65,19 @@ namespace FiTex2SRT.Engine
                 if (previousMatch != null)
                 {
                     AppendToSameLine(buffer, rawText, previousMatch.Index + previousMatch.Length, match.Index);
-                    syncTimes.Add(buffer.Length - 1, ParseTime(previousMatch.Groups["end"].Value));
+                    syncPoints.Add((ParseTime(previousMatch.Groups["end"].Value), buffer.Length - 1));
                 }
-                syncTimes.Add(buffer.Length, ParseTime(match.Groups["start"].Value));
+                syncPoints.Add((ParseTime(match.Groups["start"].Value), buffer.Length));
                 previousMatch = match;
             }
 
             if (previousMatch != null)
             {
                 AppendToSameLine(buffer, rawText, previousMatch.Index + previousMatch.Length, rawText.Length);
-                syncTimes.Add(buffer.Length - 1, ParseTime(previousMatch.Groups["end"].Value));
+                syncPoints.Add((ParseTime(previousMatch.Groups["end"].Value), buffer.Length - 1));
             }
 
-            return new Transcript(buffer.ToString(), syncTimes);
+            return new Transcript(buffer.ToString(), syncPoints);
         }
     }
 }
