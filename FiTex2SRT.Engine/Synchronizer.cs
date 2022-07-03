@@ -116,6 +116,9 @@ namespace FiTex2SRT.Engine
 
                 Debug.WriteLine(ToString(autoSubWords, transcriptWords, matchesInTranscript));
 
+                if ((float)matchesInAutoSubs.Count / autoSubWords.Count < 0.4f)
+                    continue;
+
                 int? centerOfMatchInAutoSub = PhraseUtils.CalculateCenterOf(matchesInAutoSubs);
                 int? centerOfMatchInTranscript = PhraseUtils.CalculateCenterOf(matchesInTranscript);
 
