@@ -209,6 +209,14 @@ namespace FiTex2SRT.Engine.UnitTests
         }
 
         [Fact]
+        public void FindEndOfSentence_QuotationMarkIsNotDelimiter()
+        {
+            string text = "\"Lorem\", \"dolor\". \"Sit\" amet?";
+            string[] expectedSentences = new[] { "\"Lorem\"", "\"dolor\".", "\"Sit\" amet?" };
+            VerifyText(text, expectedSentences);
+        }
+
+        [Fact]
         public void FindEndOfSentence_ManySentences()
         {
             string text = "Lorem, ipsum. Dolor! Sit: amet.";

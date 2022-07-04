@@ -65,7 +65,7 @@ namespace FiTex2SRT.Engine
         }
 
         private static readonly Regex _endPhraseRegex =
-            new(@"[\w\)](?<end>\s+-+\s+|\s*[,;:]+\s*|\s*(?<finalchars>[.?!]+)\s*)", RegexOptions.Compiled);
+            new(@"[\w\)""](?<end>\s+-+\s+|\s*[,;:]+\s*|\s*(?<finalchars>[.?!]+)\s*)", RegexOptions.Compiled);
 
         /// <summary>
         /// Findet das Ende eines Satzes.
