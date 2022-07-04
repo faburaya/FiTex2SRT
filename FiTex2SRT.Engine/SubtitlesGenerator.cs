@@ -9,6 +9,22 @@ namespace FiTex2SRT.Engine
     /// </summary>
     public class SubtitlesGenerator
     {
+        private static readonly int _maxCaptionLength = 60;
+
+        private static (int end, int next) GetEndOfCaption(string text, int start)
+        {
+            (int end, int next) = PhraseUtils.FindEndOfSentence(text, start);
+
+            if (end - start > _maxCaptionLength)
+            {
+                end = start + (int)Math.Round(0.7 * _maxCaptionLength);
+                next = end = WordUtils.FindClosestStartOrEndOfWord(text, end);
+                while (next < text.Length && char.IsWhiteSpace(text[next]))
+                    ++next;
+            }
+            return (end, next);
+        }
+
         private static TimeSpan EstimateTimeOf(int pos, List<(TimeSpan time, int pos)> syncPoints)
         {
             Debug.Assert(syncPoints.Count > 0);
@@ -36,12 +52,14 @@ namespace FiTex2SRT.Engine
             int start = 0;
             while (start < transcript.Text.Length)
             {
-                (int end, int next) = PhraseUtils.FindEndOfSentence(transcript.Text, start);
+                (int end, int next) = GetEndOfCaption(transcript.Text, start);
+
                 subtitles.Add(new Subtitle {
                     startTime = EstimateTimeOf(start, transcript.SyncPoints),
                     endTime = EstimateTimeOf(end, transcript.SyncPoints),
                     caption = transcript.Text[start..end]
                 });
+
                 start = next;
             }
             return subtitles;
