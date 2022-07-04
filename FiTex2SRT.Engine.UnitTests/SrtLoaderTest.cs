@@ -12,20 +12,9 @@ namespace FiTex2SRT.Engine.UnitTests
     {
         private static string CreateSrtFile(Subtitle[] subtitles)
         {
-            const string timeFormat = @"hh\:mm\:ss\,fff";
-
-            int id = 0;
-            StringBuilder buffer = new();
-            foreach (var entry in subtitles)
-            {
-                buffer.AppendLine(id++.ToString());
-                buffer.AppendLine($"{entry.startTime.ToString(timeFormat)} --> {entry.endTime.ToString(timeFormat)}");
-                buffer.AppendLine(entry.caption);
-                buffer.AppendLine();
-            }
-
-            const string filePath = "dummy_subtitles.srt";
-            File.WriteAllText(filePath, buffer.ToString());
+            string content = SubtitlesHelper.GenerateExpectedSrtContent(subtitles);
+            const string filePath = "dummy_subtitles_for_loader.srt";
+            File.WriteAllText(filePath, content);
             return filePath;
         }
 
