@@ -34,12 +34,13 @@ namespace FiTex2SRT.Engine.UnitTests
             foreach (var paragraph in paragraphs)
             {
                 syncPoints.Add((paragraph.start, buffer.Length));
-                buffer.Append(paragraph.text);
+                buffer.Append(paragraph.text
+                    .Replace("\r", "")
+                    .Replace('\n', ' ')
+                    .Replace("  ", " ")
+                ).Append(' ');
                 syncPoints.Add((paragraph.end, buffer.Length - 1));
-                buffer.AppendLine();
             }
-            buffer.Replace("\r", "");
-            buffer.Replace('\n', ' ');
             return (buffer.ToString(), syncPoints);
         }
 
@@ -48,9 +49,9 @@ namespace FiTex2SRT.Engine.UnitTests
         {
             List<(TimeSpan, TimeSpan, string)> paragraphs = new()
             {
-                (new TimeSpan(0, 0, 0, 0, 990), new TimeSpan(0, 0, 0, 50, 300), "Erster Abschnitt.\nAndere Zeile."),
-                (new TimeSpan(0, 0, 0, 52, 100), new TimeSpan(0, 0, 1, 42, 800), "Zweiter Abschnitt.\nAndere Zeile."),
-                (new TimeSpan(0, 1, 2, 34, 500), new TimeSpan(0, 2, 3, 45, 670), "Dritter Abschnitt.\nAndere Zeile."),
+                (new TimeSpan(0, 0, 0, 0, 990), new TimeSpan(0, 0, 0, 50, 300), "1er Abschnitt.\nAndere Zeile."),
+                (new TimeSpan(0, 0, 0, 52, 100), new TimeSpan(0, 0, 1, 42, 800), "2er Abschnitt. \nAndere Zeile."),
+                (new TimeSpan(0, 1, 2, 34, 500), new TimeSpan(0, 2, 3, 45, 670), "3er Abschnitt. \n Andere Zeile."),
             };
 
             var expected = CreateExpectations(paragraphs);
@@ -64,7 +65,7 @@ namespace FiTex2SRT.Engine.UnitTests
             {
                 (TimeSpan expectedTime, int expectedPos) = expected.syncPoints[idx];
                 (TimeSpan actualTime, int actualPos) = transcript.SyncPoints[idx];
-                Assert.InRange(actualPos, expectedPos - 2, expectedPos + 2);
+                Assert.Equal(expectedPos, actualPos);
                 Assert.Equal(expectedTime, actualTime);
             }
             Assert.Equal(expected.syncPoints.Count, transcript.SyncPoints.Count);

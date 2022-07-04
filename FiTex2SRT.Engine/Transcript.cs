@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -29,17 +30,18 @@ namespace FiTex2SRT.Engine
         
         private static void AppendToSameLine(StringBuilder buffer, string s, int start, int end)
         {
-            foreach (char ch in s.AsSpan(start, end - start))
+            foreach (char c in s.AsSpan(start, end - start))
             {
-                switch (ch)
+                switch (c)
                 {
                     case '\r':
                         break;
                     case '\n':
-                        buffer.Append(' ');
+                        if (buffer.Length > 0 && buffer[^1] != ' ')
+                            buffer.Append(' ');
                         break;
                     default:
-                        buffer.Append(ch);
+                        buffer.Append(c);
                         break;
                 }
             }
