@@ -3,6 +3,8 @@ using System.Text;
 
 using FiTex2SRT.Engine;
 
+using Reusable.Utils;
+
 namespace FiTex2SRT
 {
     internal class Program
@@ -14,7 +16,7 @@ namespace FiTex2SRT
                 Console.WriteLine("Usage: program.exe transcript.pdf auto_subtitles.srt");
                 return;
             }
-
+            
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Synchronizer synchronizer = new(new PdfTextLoader(), new SrtLoader());
@@ -28,6 +30,14 @@ namespace FiTex2SRT
                     continue;
 
                 Console.WriteLine($"Synchronization point #{idx} is out-of-order: {syncPoint}");
+            }
+
+            Console.WriteLine("\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n");
+
+            List<Subtitle> subtitles = SubtitlesGenerator.CreateSubtitlesFrom(refinedTranscript);
+            foreach (Subtitle subtitle in subtitles)
+            {
+                Console.WriteLine($"[{subtitle.endTime - subtitle.startTime}] : {subtitle.caption}");
             }
         }
     }
