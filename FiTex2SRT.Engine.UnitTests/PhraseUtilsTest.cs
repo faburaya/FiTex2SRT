@@ -137,10 +137,26 @@ namespace FiTex2SRT.Engine.UnitTests
         }
 
         [Fact]
-        public void FindEndOfSentence_PunktIsDelimiter()
+        public void FindEndOfSentence_NoDelimiter()
+        {
+            string text = "Lorem ipsum dolor";
+            string[] expectedSentences = new[] { "Lorem ipsum dolor" };
+            VerifyText(text, expectedSentences);
+        }
+
+        [Fact]
+        public void FindEndOfSentence_PeriodIsDelimiter()
         {
             string text = "Lorem. Ipsum.";
             string[] expectedSentences = new[] { "Lorem.", "Ipsum." };
+            VerifyText(text, expectedSentences);
+        }
+
+        [Fact]
+        public void FindEndOfSentence_PeriodIsNotDelimiter_IfWithinNumber()
+        {
+            string text = "Lorem 1.000 Ipsum.";
+            string[] expectedSentences = new[] { "Lorem 1.000 Ipsum." };
             VerifyText(text, expectedSentences);
         }
 
@@ -211,8 +227,8 @@ namespace FiTex2SRT.Engine.UnitTests
         [Fact]
         public void FindEndOfSentence_QuotationMarkIsNotDelimiter()
         {
-            string text = "\"Lorem\", \"dolor\". \"Sit\" amet?";
-            string[] expectedSentences = new[] { "\"Lorem\"", "\"dolor\".", "\"Sit\" amet?" };
+            string text = "\"Lorem\", “ipsum”, «dolor». \"Sit\" amet?";
+            string[] expectedSentences = new[] { "\"Lorem\"", "“ipsum”", "«dolor».", "\"Sit\" amet?" };
             VerifyText(text, expectedSentences);
         }
 
