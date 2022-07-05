@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 
 using Reusable.Utils;
 
@@ -9,7 +10,24 @@ namespace FiTex2SRT.Engine
     /// </summary>
     public class SubtitlesGenerator
     {
-        private static readonly int _maxCaptionLength = 60;
+        private static readonly int _maxCaptionLength = 50;
+
+        private static string BreakIfLong(string line)
+        {
+            if (line.Length > (int)Math.Round(0.5 * _maxCaptionLength))
+            {
+                int breakIdx = WordUtils.FindEndOfWord(line, line.Length / 2);
+                if (breakIdx < line.Length)
+                {
+                    StringBuilder buffer = new();
+                    buffer.Append(line.AsSpan(0, breakIdx));
+                    buffer.Append('\n');
+                    buffer.Append(line.AsSpan(breakIdx + 1));
+                    return buffer.ToString();
+                }
+            }
+            return line;
+        }
 
         private static (int end, int next) GetEndOfCaption(string text, int start)
         {
@@ -57,7 +75,7 @@ namespace FiTex2SRT.Engine
                 subtitles.Add(new Subtitle {
                     startTime = EstimateTimeOf(start, transcript.SyncPoints),
                     endTime = EstimateTimeOf(end, transcript.SyncPoints),
-                    caption = transcript.Text[start..end]
+                    caption = BreakIfLong(transcript.Text[start..end])
                 });
 
                 start = next;

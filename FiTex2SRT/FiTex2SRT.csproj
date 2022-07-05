@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FiTex2SRT.Engine\FiTex2SRT.Engine.csproj" />
+  </ItemGroup>
+
 </Project>

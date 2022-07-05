@@ -3,8 +3,6 @@ using System.Text;
 
 using FiTex2SRT.Engine;
 
-using Reusable.Utils;
-
 namespace FiTex2SRT
 {
     internal class Program
