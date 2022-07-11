@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 
 using Reusable.Utils;
 
@@ -43,20 +42,19 @@ namespace FiTex2SRT.Engine
             return (end, next);
         }
 
-        private static TimeSpan EstimateTimeOf(int pos, List<(TimeSpan time, int pos)> syncPoints)
+        private static TimeSpan EstimateTimeOf(int pos, List<SynchronizationPoint> syncPoints)
         {
-            Debug.Assert(syncPoints.Count > 0);
-            int idx = syncPoints.SearchLowerBoundIndex(pos, x => x.pos);
-
-            if (idx == 0)
-                return syncPoints.First().time;
-
-            if (idx == syncPoints.Count)
-                return syncPoints.Last().time;
-
-            var left = syncPoints[idx - 1];
-            var right = syncPoints[idx];
-            return left.time + (right.time - left.time) * (pos - left.pos) / (right.pos - left.pos);
+            if (syncPoints.Count < 2)
+            {
+                throw new ApplicationException("Cannot estimate instant of text position, because not enough synchronization points are available.");
+            }
+            int idx = syncPoints.SearchUpperBoundIndex(pos, x => x.Position);
+            SynchronizationPoint nextSyncPoint = syncPoints[idx];
+            SynchronizationPoint prevSyncPoint = syncPoints[idx - 1];
+            return prevSyncPoint.Time +
+                (nextSyncPoint.Time - prevSyncPoint.Time)
+                * (pos - prevSyncPoint.Position)
+                / (nextSyncPoint.Position - prevSyncPoint.Position);
         }
 
         /// <summary>

@@ -24,7 +24,7 @@ namespace FiTex2SRT
             {
                 var prevSyncPoint = refinedTranscript.SyncPoints[idx - 1];
                 var syncPoint = refinedTranscript.SyncPoints[idx];
-                if (syncPoint.time > prevSyncPoint.time && syncPoint.pos > prevSyncPoint.pos)
+                if (syncPoint.Time > prevSyncPoint.Time && syncPoint.Position > prevSyncPoint.Position)
                     continue;
 
                 Console.WriteLine($"Synchronization point #{idx} is out-of-order: {syncPoint}");
@@ -35,7 +35,7 @@ namespace FiTex2SRT
             List<Subtitle> subtitles = SubtitlesGenerator.CreateSubtitlesFrom(refinedTranscript);
             foreach (Subtitle subtitle in subtitles)
             {
-                Console.WriteLine($"[{subtitle.endTime - subtitle.startTime}] : {subtitle.caption}");
+                Console.WriteLine($"[{(subtitle.endTime - subtitle.startTime).TotalMilliseconds / 1000.0,3:F1}] : {subtitle.caption.Replace("\n","</br>")}");
             }
         }
     }

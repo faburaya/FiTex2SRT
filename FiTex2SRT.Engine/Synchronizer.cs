@@ -46,43 +46,40 @@ namespace FiTex2SRT.Engine
             return buffer.ToString();
         }
 
-        private static void AddSyncPoint(List<(TimeSpan time, int pos)> syncPoints, TimeSpan time, int pos)
+        private static void AddSyncPoint(
+            List<SynchronizationPoint> syncPoints, TimeSpan time, int pos)
         {
-            int idx = syncPoints.SearchLowerBoundIndex(time, x => x.time);
-            if (idx == syncPoints.Count || syncPoints[idx].time != time)
-            {
-                syncPoints.Insert(idx, (time, pos));
-            }
+            int idx = syncPoints.SearchUpperBoundIndex(time, x => x.Time);
+            syncPoints.Insert(idx, new SynchronizationPoint(time, pos));
         }
 
-        private static int FindPositionInTranscript(TimeSpan time, Transcript transcript)
+        private static int FindLikelyPositionInTranscript(TimeSpan time, Transcript transcript)
         {
-            int idx = transcript.SyncPoints.SearchLowerBoundIndex(time, x => x.time);
-
+            int idx = transcript.SyncPoints.SearchUpperBoundIndex(time, x => x.Time);
             if (idx == 0)
-                return transcript.SyncPoints.First().pos;
+                return 0;
 
-            if (idx == transcript.SyncPoints.Count)
-                return transcript.SyncPoints.Last().pos;
+            if (idx >= transcript.SyncPoints.Count)
+                return transcript.Text.Length - 1;
 
-            var right = transcript.SyncPoints[idx];
-            var left = transcript.SyncPoints[idx - 1];
-            return (int)Math.Round(left.pos + (right.pos - left.pos) * (time - left.time) / (right.time - left.time));
+            SynchronizationPoint nextSyncPoint = transcript.SyncPoints[idx];
+            SynchronizationPoint previousSyncPoint = transcript.SyncPoints[idx - 1];
+            return previousSyncPoint.Position + (int)Math.Round(
+                (nextSyncPoint.Position - previousSyncPoint.Position)
+                * (time - previousSyncPoint.Time)
+                / (nextSyncPoint.Time - previousSyncPoint.Time));
         }
 
         private static (int start, int end) FindStretchInTranscript(
             TimeSpan startTime, TimeSpan endTime, Transcript transcript)
         {
-            int end = FindPositionInTranscript(endTime, transcript);
-            int start = FindPositionInTranscript(startTime, transcript);
-
-            start = Math.Max((int)Math.Round(start + (start - end) * 0.2), 0);
-            start = WordUtils.FindClosestStartOrEndOfWord(transcript.Text, start);
-            
-            end = Math.Min((int)Math.Round(end + (end - start) * 0.2), transcript.Text.Length);
-            end = WordUtils.FindEndOfWord(transcript.Text, end);
-
-            return (start, end);
+            int start = FindLikelyPositionInTranscript(startTime, transcript);
+            int end = FindLikelyPositionInTranscript(endTime, transcript);
+            int safeStart = Math.Clamp(start + (start - end) / 3, 0, transcript.Text.Length - 1);
+            int safeEnd = Math.Min(transcript.Text.Length - 1, end + (end - start) / 3);
+            int adjustedStart = WordUtils.FindClosestStartOrEndOfWord(transcript.Text, safeStart);
+            int adjustedEnd = WordUtils.FindEndOfWord(transcript.Text, safeEnd);
+            return (adjustedStart, adjustedEnd);
         }
 
         /// <summary>
@@ -116,7 +113,7 @@ namespace FiTex2SRT.Engine
 
                 Debug.WriteLine(ToString(autoSubWords, transcriptWords, matchesInTranscript));
 
-                if ((float)matchesInAutoSubs.Count / autoSubWords.Count < 0.4f)
+                if ((float)matchesInAutoSubs.Count / autoSubWords.Count < 0.5f)
                     continue;
 
                 int? centerOfMatchInAutoSub = PhraseUtils.CalculateCenterOf(matchesInAutoSubs);
@@ -143,19 +140,19 @@ namespace FiTex2SRT.Engine
             return transcript;
         }
 
-        private static void EnsureOrder(List<(TimeSpan time, int pos)> syncPoints)
+        private static void EnsureOrder(List<SynchronizationPoint> syncPoints)
         {
             int idx = 1;
             while (idx < syncPoints.Count)
             {
-                if (syncPoints[idx].pos > syncPoints[idx - 1].pos)
+                if (syncPoints[idx].Position > syncPoints[idx - 1].Position)
                 {
                     ++idx;
                     continue;
                 }
 
                 int outOfOrderIdx;
-                if (idx >= 2 && syncPoints[idx].pos > syncPoints[idx - 2].pos)
+                if (idx >= 2 && syncPoints[idx].Position > syncPoints[idx - 2].Position)
                 {
                     outOfOrderIdx = idx - 1;
                 }
@@ -164,7 +161,7 @@ namespace FiTex2SRT.Engine
                     outOfOrderIdx = idx;
                 }
 
-                Console.WriteLine($"Dropping out-of-order synchronization point at {syncPoints[outOfOrderIdx].time}");
+                Console.WriteLine($"Dropping out-of-order synchronization point at {syncPoints[outOfOrderIdx].Time}");
                 syncPoints.RemoveAt(outOfOrderIdx);
             }
         }

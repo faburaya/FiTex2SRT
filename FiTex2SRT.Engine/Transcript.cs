@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -13,9 +12,9 @@ namespace FiTex2SRT.Engine
     {
         public string Text { get; private init; }
 
-        public List<(TimeSpan time, int pos)> SyncPoints { get; private init; }
+        public List<SynchronizationPoint> SyncPoints { get; private init; }
 
-        private Transcript(string text, List<(TimeSpan, int)> syncPoints)
+        private Transcript(string text, List<SynchronizationPoint> syncPoints)
         {
             Text = text;
             SyncPoints = syncPoints;
@@ -59,26 +58,19 @@ namespace FiTex2SRT.Engine
         public static Transcript Parse(string rawText)
         {
             StringBuilder buffer = new();
-            List<(TimeSpan time, int pos)> syncPoints = new();
-
-            Match? previousMatch = null;
-            foreach (Match match in _timeRegex.Matches(rawText))
+            List<SynchronizationPoint> syncPoints = new();
+            MatchCollection matches = _timeRegex.Matches(rawText);
+            for (int idx = 0; idx < matches.Count; ++idx)
             {
-                if (previousMatch != null)
-                {
-                    AppendToSameLine(buffer, rawText, previousMatch.Index + previousMatch.Length, match.Index);
-                    syncPoints.Add((ParseTime(previousMatch.Groups["end"].Value), buffer.Length - 1));
-                }
-                syncPoints.Add((ParseTime(match.Groups["start"].Value), buffer.Length));
-                previousMatch = match;
+                Match match = matches[idx];
+                int startPos = match.Index + match.Length;
+                int endPos = (idx + 1 < matches.Count ? matches[idx + 1].Index : rawText.Length);
+                TimeSpan startTime = ParseTime(match.Groups["start"].Value);
+                TimeSpan endTime = ParseTime(match.Groups["end"].Value);
+                syncPoints.Add(new SynchronizationPoint(startTime, buffer.Length));
+                AppendToSameLine(buffer, rawText, startPos, endPos);
+                syncPoints.Add(new SynchronizationPoint(endTime, buffer.Length - 1));
             }
-
-            if (previousMatch != null)
-            {
-                AppendToSameLine(buffer, rawText, previousMatch.Index + previousMatch.Length, rawText.Length);
-                syncPoints.Add((ParseTime(previousMatch.Groups["end"].Value), buffer.Length - 1));
-            }
-
             return new Transcript(buffer.ToString(), syncPoints);
         }
     }
